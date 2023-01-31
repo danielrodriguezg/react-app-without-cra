@@ -36,12 +36,15 @@ class Calculator extends Component {
             if (code === 'Backspace') {
                 this.setState({ prompt: this.state.prompt.slice(0, -1) });
             }
+            if (name.toUpperCase() === 'C') {
+                this.clear();
+            }
         }, false);
     }
 
     addToPrompt(op) {
         if (this.OPEATORS.includes(op)) {
-            if (this.state.prompt.length == 0) {
+            if (this.state.prompt.length == 0 && ['*', '/'].includes(op)) {
                 console.error("Error de sintaxis. No agregar operadores al inicio");
                 this.setState({
                     result: 'Error de Sintaxis'
@@ -66,9 +69,9 @@ class Calculator extends Component {
         });
     }
     processResult(numbers, operators) {
-        let resultado = 0, operatorsIdx = 0;
+        let resultado, operatorsIdx = 0;
         numbers.forEach(num => {
-            if (resultado == 0) {
+            if (typeof resultado === 'undefined') {
                 resultado = num;
                 return;
             }
@@ -93,7 +96,9 @@ class Calculator extends Component {
                 operatorsIdx++;
             }
         });
-
+        if (!resultado) {
+            return 0;
+        }
         return resultado;
     }
 
@@ -112,8 +117,12 @@ class Calculator extends Component {
             }
             if (typeof val == 'string') {
                 operators.push(val);
-                numbers.push(parseInt(numStr));
-                numStr = '';
+                if (idx === 0 && ['-', '+'].includes(val)) {
+                    numbers.push(0);
+                } else {
+                    numbers.push(parseInt(numStr));
+                    numStr = '';
+                }
             }
         });
         //Ordenar jerarquia
@@ -153,7 +162,7 @@ class Calculator extends Component {
     render() {
         return <div className='container'>
             <div className='calc'>
-                <h1 style={{textAlign: 'center', fontSize: '20px', marginBottom: '1em'}}>{'Calculadora con React < 16.8'}</h1>
+                <h1 style={{ textAlign: 'center', fontSize: '20px', marginBottom: '1em' }}>{'Calculadora con React < 16.8'}</h1>
                 <div className="calc-container">
                     <div className="result">
                         <div className="prompt">{this.state.prompt}</div>
@@ -186,7 +195,7 @@ class Calculator extends Component {
                         </div>
                     </div>
                 </div>
-                <Instructions/>
+                <Instructions />
             </div>
         </div>
     }
