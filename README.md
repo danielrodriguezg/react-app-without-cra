@@ -14,15 +14,13 @@
 ## -instalar html-webpack-plugin (npm install --save-dev html-webpack-plugin)
     -html-webpack-plugin hace lo mismo que la libreria de webpack pero para manejo de html.
 ## -instalar librerias de React (npm install react react-dom)
-## -configurar babel 
-    -para configurar se debe hacer un archivo .babelrc y en el agregar lo siguiente:
+## -Configurar Babel. Se debe hacer un archivo .babelrc y en el agregar lo siguiente:
         
         {
             "presets": ["@babel/preset-env","@babel/preset-react"]
         }
 
-## -configurar webpack:
-    -se debe crear un archivo webpack.config.js con lo siguiente:
+## -Configurar webpack. Se debe crear un archivo webpack.config.js con lo siguiente:
         
         const HtmlWebpackPlugin = require('html-webpack-plugin');
         const path = require('path');
@@ -63,8 +61,7 @@
         ]
         };
         
-## -agregar scripts del package.json
-    -para agregar los scripts hay que abrir el archivo package.json y agregar los siguientes comandos en el objeto scripts:
+## -Agregar scripts del package.json. Para agregar los scripts hay que abrir el archivo package.json y agregar los siguientes comandos en el objeto scripts:
     
         "scripts": {
             "start": "webpack-dev-server .",
