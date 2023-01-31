@@ -3,18 +3,27 @@ import Instructions from './Instructions';
 import './styles.css';
 
 class Calculator extends Component {
+    //Constantes
     OPEATORS = ['+', '-', '*', '/'];
+    LESS_PRIORITY_OP = ['+', '-'];
+    HIGHER_PRIORITY_OP = ['*', '/'];
+    SYNTAX_ERROR = 'Error de Sintaxis';
+
     constructor() {
         super();
+        //Estado inicial
         this.state = {
             result: 0,
             prompt: []
         }
+        //Binding de funciones para llamar en el render
         this.clear = this.clear.bind(this);
         this.result = this.result.bind(this);
+        //Agrega el listener de keydown al DOM
         this.keyListener();
     }
     componentDidUpdate(prevProps, prevState) {
+        //Si el estado de la entrada cambia, muestra resultado
         if (prevState.prompt !== this.state.prompt) {
             this.result();
         }
@@ -24,18 +33,23 @@ class Calculator extends Component {
         document.addEventListener('keydown', (event) => {
             var name = event.key;
             var code = event.code;
+            //Si es numerico, parsear a int y agregar a la entrada
             if (isFinite(name)) {
                 this.addToPrompt(parseInt(name));
             }
+            //Si es un operador
             if (this.OPEATORS.includes(name)) {
                 this.addToPrompt(name);
             }
+            //Si presiona Enter, mostrar resultado
             if (code === 'Enter') {
                 this.result();
             }
+            //Si presiona Backspace (borrar), borra la ultima entrada
             if (code === 'Backspace') {
                 this.setState({ prompt: this.state.prompt.slice(0, -1) });
             }
+            //Si presiona C, limpia entrada y resultado
             if (name.toUpperCase() === 'C') {
                 this.clear();
             }
@@ -44,17 +58,19 @@ class Calculator extends Component {
 
     addToPrompt(op) {
         if (this.OPEATORS.includes(op)) {
-            if (this.state.prompt.length == 0 && ['*', '/'].includes(op)) {
+            //Si ingresa * o / al inicio, Error de sintaxis
+            if (this.state.prompt.length == 0 && this.HIGHER_PRIORITY_OP.includes(op)) {
                 console.error("Error de sintaxis. No agregar operadores al inicio");
                 this.setState({
-                    result: 'Error de Sintaxis'
+                    result: this.SYNTAX_ERROR
                 });
                 return;
             }
+            //Si agrega dos operadores seguidos, Error de sintaxis
             if (this.OPEATORS.includes(this.state.prompt[this.state.prompt.length - 1])) {
                 console.error("Error de sintaxis. No agregar dos operadores seguidos");
                 this.setState({
-                    result: 'Error de Sintaxis'
+                    result: this.SYNTAX_ERROR
                 });
                 return;
             }
@@ -63,6 +79,7 @@ class Calculator extends Component {
     }
 
     clear() {
+        //Limpia el estado
         this.setState({
             prompt: [],
             result: 0
@@ -71,6 +88,7 @@ class Calculator extends Component {
     processResult(numbers, operators) {
         let resultado, operatorsIdx = 0;
         numbers.forEach(num => {
+            //Si el acumulador (resultado) esta undefined, el acumulador se inicializa con el primer valor de la entrada
             if (typeof resultado === 'undefined') {
                 resultado = num;
                 return;
@@ -96,6 +114,7 @@ class Calculator extends Component {
                 operatorsIdx++;
             }
         });
+        //Si el resultado no fue definido despues de iterar, retorna 0
         if (!resultado) {
             return 0;
         }
@@ -103,6 +122,7 @@ class Calculator extends Component {
     }
 
     result() {
+        //Organizar los valores del array de entradas 
         const array = [...this.state.prompt];
         let operators = [];
         let numbers = [];
@@ -117,7 +137,7 @@ class Calculator extends Component {
             }
             if (typeof val == 'string') {
                 operators.push(val);
-                if (idx === 0 && ['-', '+'].includes(val)) {
+                if (idx === 0 && this.LESS_PRIORITY_OP.includes(val)) {
                     numbers.push(0);
                 } else {
                     numbers.push(parseInt(numStr));
@@ -125,12 +145,13 @@ class Calculator extends Component {
                 }
             }
         });
-        //Ordenar jerarquia
+        //Operar jerarquia
         let newNumbers = [...numbers];
         let newOp = [...operators];
         let j = 0;
         operators.forEach((op, idx) => {
-            if (['*', '/'].includes(op)) {
+            //Si el operador es de alta prioridad en jerarquia, opera primero y agrega a los numeros de entrada
+            if (this.HIGHER_PRIORITY_OP.includes(op)) {
                 let newNum = 0;
                 switch (op) {
                     case '*':
@@ -150,10 +171,12 @@ class Calculator extends Component {
         });
         numbers = newNumbers;
         operators = newOp;
-
+        //Obtener el resultado de la operacion
         let res = this.processResult(numbers, operators);
+
+        //Si el resultado no es un número, retornar error de sintaxis
         if (isNaN(res)) {
-            res = 'Error de Sintaxis';
+            res = this.SYNTAX_ERROR;
         }
         this.setState({
             result: res
